@@ -24,11 +24,12 @@ const Parentheses = ({
   };
 
   return (
-    <button
-      className={`text-xl shadow p-2 ${current ? "bg-lime-400" : ""}`}
-      onClick={() => handleParenthesesChange(id, isOpen)}>
-      {isOpen ? "(" : ")"}
-    </button>
+    <></>
+    // <button
+    //   className={`text-xl shadow p-2 ${current ? "bg-lime-400" : ""}`}
+    //   onClick={() => handleParenthesesChange(id, isOpen)}>
+    //   {isOpen ? "(" : ")"}
+    // </button>
   );
 };
 
