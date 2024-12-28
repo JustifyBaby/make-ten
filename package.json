@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "publish": "node publish.cjs"
+    "publish": "npm run build && git add . && git commit -m $npm_config_m && git push && gh-pages -d dist"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
