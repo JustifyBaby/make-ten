@@ -90,7 +90,7 @@ export default function Formula() {
   }, [piece]);
 
   return (
-    <main className='flex flex-col justify-center items-center h-screen'>
+    <main className='flex flex-col justify-center items-center'>
       <GameSetting piece={piece} setPiece={setPiece} />
 
       <DndContext
@@ -100,10 +100,10 @@ export default function Formula() {
         <SortableContext
           items={numList.map((item) => item.id)}
           strategy={verticalListSortingStrategy}>
-          <section className='flex justify-center items-center'>
+          <section className='flex justify-center items-center py-10'>
             {numList.map((item, index) => (
               <SortableItem key={item.id} id={item.id}>
-                <div className='flex justify-between items-center rounded p-2'>
+                <div className='flex justify-between items-center rounded px-2'>
                   {index !== piece - 1 && (
                     <Parentheses
                       numList={numList}
@@ -113,7 +113,9 @@ export default function Formula() {
                       id={item.id}
                     />
                   )}
-                  <span className='p-3 text-xl'>{item.num}</span>
+                  <span className='md:p-1 lg:p-3 lg:text-xl md:text-lg'>
+                    {item.num}
+                  </span>
                   {index === piece - 1 ? (
                     <Parentheses
                       numList={numList}
@@ -129,9 +131,12 @@ export default function Formula() {
                         onChange={(e) => {
                           handleOperatorChange(e.target.value, item.id);
                         }}
-                        className='p-2 m-2 bg-gray-100 rounded-sm '>
+                        className='md:p-1 lg:p-2 md:m-1 lg:m-2 bg-gray-100 rounded-sm'>
                         {operators.map((operator, index) => (
-                          <option value={operator} key={index} className='p-2'>
+                          <option
+                            value={operator}
+                            key={index}
+                            className='md:p-1 lg:p-2'>
                             {operator}
                           </option>
                         ))}
@@ -148,7 +153,7 @@ export default function Formula() {
                 </div>
               </SortableItem>
             ))}
-            <span className='text-xl font-bold'>= 10</span>
+            <span className='md:text-lg lg:text-xl font-bold'>= 10</span>
           </section>
         </SortableContext>
       </DndContext>
