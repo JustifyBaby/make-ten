@@ -19,12 +19,14 @@ import GameSetting from "./GameSetting";
 import { genNumList } from "../utils/global";
 import Parentheses from "./Parentheses";
 
+// const Formula = memo(() => {});
 export default function Formula() {
   const [piece, setPiece] = useState(4); // 個数の設定
   const [numList, setNumList] = useState(genNumList(piece)); // 実際の数字の列
   const [isRight, setIsRight] = useState("");
   const [score, setScore] = useState(0);
   const [scoreRate, setScoreRate] = useState(1);
+  const [error, setError] = useState("");
 
   const calcEnteredFormula = (formula: string) => {
     const safetyCode = sanitize(formula);
@@ -48,8 +50,8 @@ export default function Formula() {
 
   const handleOperatorChange = (nextOperator: string, id: number) => {
     const updatedData = [...numList];
-    const data = updatedData.find((item) => item.id === id);
-    data!.operator = nextOperator;
+    const data = updatedData.find((item) => item.id === id)!;
+    data.operator = nextOperator;
     setNumList(updatedData);
   };
 
@@ -59,31 +61,34 @@ export default function Formula() {
     let formula = "";
     for (const item of numList.map(
       ({ num, operator, openParentheses, closeParentheses }) =>
-        `${openParentheses ? "(" : ""}${num}${operator}${
+        `${openParentheses ? "(" : ""}${num}${
           closeParentheses ? ")" : ""
-        }`
+        }${operator}`
     )) {
       formula += item;
     }
-    console.log(formula);
 
     // 現在、formulaは"1+2+4+5+"のようになっているので、
     // 0か1を結合
     if (formula.endsWith("+") || formula.endsWith("-")) formula += 0;
     else formula += 1;
 
-    const calcResult = calcEnteredFormula(formula);
-    if (calcResult === 10) {
-      setScoreRate(scoreRate + 1);
-      setScore(score + scoreRate);
-      setIsRight("成功です!");
-    } else {
-      setIsRight(`失敗! その式は${calcResult}です。`);
-      setScoreRate(1);
+    try {
+      const calcResult = calcEnteredFormula(formula);
+      if (calcResult === 10) {
+        setScoreRate(scoreRate + 1);
+        setScore(score + scoreRate);
+        setIsRight("成功です!");
+      } else {
+        setIsRight(`失敗! その式は${calcResult}です。`);
+        setScoreRate(1);
+      }
+      setError("");
+    } catch (err) {
+      setError("式が成立していません。");
+      return err;
     }
   };
-
-  console.log(scoreRate, score);
 
   useEffect(() => {
     setNumList(genNumList(piece));
@@ -102,29 +107,32 @@ export default function Formula() {
           strategy={verticalListSortingStrategy}>
           <section className='flex justify-center items-center py-10'>
             {numList.map((item, index) => (
-              <SortableItem key={item.id} id={item.id}>
-                <div className='flex justify-between items-center rounded px-2'>
-                  {index !== piece - 1 && (
-                    <Parentheses
-                      numList={numList}
-                      setNumList={setNumList}
-                      isOpen={true}
-                      current={item.openParentheses}
-                      id={item.id}
-                    />
-                  )}
+              <div className='flex justify-center items-center' key={item.id}>
+                <Parentheses
+                  numList={numList}
+                  setNumList={setNumList}
+                  isOpen={true}
+                  current={item.openParentheses}
+                  id={item.id}
+                />
+
+                <SortableItem id={item.id}>
+                  {/* <div className='flex justify-between items-center rounded px-2'> */}
                   <span className='md:p-1 lg:p-3 lg:text-xl md:text-lg'>
                     {item.num}
                   </span>
-                  {index === piece - 1 ? (
-                    <Parentheses
-                      numList={numList}
-                      setNumList={setNumList}
-                      isOpen={false}
-                      current={item.closeParentheses}
-                      id={item.id}
-                    />
-                  ) : (
+                </SortableItem>
+
+                <Parentheses
+                  id={item.id}
+                  isOpen={false}
+                  numList={numList}
+                  setNumList={setNumList}
+                  current={item.closeParentheses}
+                />
+
+                <SortableItem id={item.id}>
+                  {index !== piece - 1 && (
                     <div>
                       <select
                         defaultValue={item.operator}
@@ -141,17 +149,10 @@ export default function Formula() {
                           </option>
                         ))}
                       </select>
-                      <Parentheses
-                        numList={numList}
-                        setNumList={setNumList}
-                        isOpen={false}
-                        current={item.closeParentheses}
-                        id={item.id}
-                      />
                     </div>
                   )}
-                </div>
-              </SortableItem>
+                </SortableItem>
+              </div>
             ))}
             <span className='md:text-lg lg:text-xl font-bold'>= 10</span>
           </section>
@@ -176,6 +177,7 @@ export default function Formula() {
           }`}>
           {isRight}
         </div>
+        {error !== "" && <p>{error}</p>}
         <div className='text-lg'>現在のスコア: {score}</div>
       </div>
     </main>

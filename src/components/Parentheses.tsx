@@ -14,23 +14,23 @@ const Parentheses = ({
   setNumList: Dispatch<SetStateAction<NumElement[]>>;
   isOpen: boolean;
 }) => {
-  // const handleParenthesesChange = (id: number, isOpen: boolean) => {z
-  //   const updatedData = [...numList];
-  //   const data = updatedData.find((item) => item.id === id);
-  //   if (isOpen) data!.openParentheses = !data!.openParentheses;
-  //   else data!.closeParentheses = !data!.closeParentheses;
+  const handleParenthesesChange = (id: number, isOpen: boolean) => {
+    const updatedData = [...numList];
+    const data = updatedData.find((item) => item.id === id);
+    if (!data) throw new Error("dataが見つかりません。");
 
-  //   setNumList(updatedData);
-  // };
+    if (isOpen) data.openParentheses = !data.openParentheses;
+    else data.closeParentheses = !data.closeParentheses;
 
-  console.log(id, isOpen, current, numList, setNumList);
+    setNumList(updatedData);
+  };
+
   return (
-    <></>
-    // <button
-    //   className={`text-xl shadow p-2 ${current ? "bg-lime-400" : ""}`}
-    //   onClick={() => handleParenthesesChange(id, isOpen)}>
-    //   {isOpen ? "(" : ")"}
-    // </button>
+    <button
+      className={`text-2xl shadow p-2 ${current ? "bg-lime-400" : ""}`}
+      onClick={() => handleParenthesesChange(id, isOpen)}>
+      {isOpen ? "(" : ")"}
+    </button>
   );
 };
 
