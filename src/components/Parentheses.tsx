@@ -27,7 +27,9 @@ const Parentheses = ({
 
   return (
     <button
-      className={`text-2xl shadow p-2 ${current ? "bg-lime-400" : ""}`}
+      className={`md:text-base lg:text-xl shadow p-1 ${
+        current ? "bg-lime-400" : ""
+      }`}
       onClick={() => handleParenthesesChange(id, isOpen)}>
       {isOpen ? "(" : ")"}
     </button>

@@ -5,3 +5,7 @@
 ol li {
   list-style: decimal;
 }
+
+* {
+  transition: all 0.2s;
+}

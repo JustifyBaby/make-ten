@@ -8,44 +8,45 @@ import {
   closestCenter,
   DndContext,
   DragEndEvent,
-  KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import sanitize from "sanitize-html";
 import SortableItem from "./SortableItem";
 import GameSetting from "./GameSetting";
-import { genNumList } from "../utils/global";
+import { calcEnteredFormula, genNumList } from "../utils/global";
 import Parentheses from "./Parentheses";
 
-// const Formula = memo(() => {});
+type Status = "right" | "wrong" | "error" | "";
+
 export default function Formula() {
-  const [piece, setPiece] = useState(4); // 個数の設定
-  const [numList, setNumList] = useState(genNumList(piece)); // 実際の数字の列
-  const [isRight, setIsRight] = useState("");
+  // 個数の設定
+  const [piece, setPiece] = useState(4);
+
+  // 実際の数字の列
+  const [numList, setNumList] = useState(genNumList(piece));
+
+  // ゲームの状態
+  const [[isRight, status], setIsRight] = useState<[string, Status]>(["", ""]);
+
+  // スコアの状態
   const [score, setScore] = useState(0);
   const [scoreRate, setScoreRate] = useState(1);
-  const [error, setError] = useState("");
-
-  const calcEnteredFormula = (formula: string) => {
-    const safetyCode = sanitize(formula);
-    const value = eval(safetyCode);
-    return value;
-  };
+  const [scoreRateChange, setScoreRateChange] = useState(1);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor)
+    // useSensor(KeyboardSensor),
+    useSensor(TouchSensor)
   );
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (active.id !== over?.id) {
-      const oldIndex = numList.findIndex(({ id }) => id === active.id);
-      const newIndex = numList.findIndex(({ id }) => id === over?.id);
+    if (active.id === over?.id) return;
+    const oldIndex = numList.findIndex(({ id }) => id === active.id);
+    const newIndex = numList.findIndex(({ id }) => id === over?.id);
 
-      setNumList((prevData) => arrayMove(prevData, oldIndex, newIndex));
-    }
+    setNumList((prevData) => arrayMove(prevData, oldIndex, newIndex));
   };
 
   const handleOperatorChange = (nextOperator: string, id: number) => {
@@ -68,30 +69,41 @@ export default function Formula() {
       formula += item;
     }
 
-    // 現在、formulaは"1+2+4+5+"のようになっているので、
-    // 0か1を結合
+    // 現在、formulaは"1+2+4+5+"のようになっているので、0か1を結合
     if (formula.endsWith("+") || formula.endsWith("-")) formula += 0;
     else formula += 1;
 
     try {
       const calcResult = calcEnteredFormula(formula);
       if (calcResult === 10) {
-        setScoreRate(scoreRate + 1);
-        setScore(score + scoreRate);
-        setIsRight("成功です!");
+        setScoreRate((prevRate) => prevRate + scoreRateChange);
+        setScore((prevScore) => prevScore + scoreRate);
+        setIsRight(["成功です!", "right"]);
       } else {
-        setIsRight(`失敗! その式は${calcResult}です。`);
+        setIsRight([`失敗! その式は${calcResult}です。`, "wrong"]);
         setScoreRate(1);
       }
-      setError("");
     } catch (err) {
-      setError("式が成立していません。");
+      setIsRight(["式が成立していません。", "error"]);
       return err;
     }
   };
 
   useEffect(() => {
     setNumList(genNumList(piece));
+    switch (piece) {
+      case 4:
+        setScoreRateChange(1);
+        break;
+      case 5:
+        setScoreRateChange(2);
+        break;
+      case 6:
+        setScoreRateChange(3);
+        break;
+      default:
+        break;
+    }
   }, [piece]);
 
   return (
@@ -117,10 +129,7 @@ export default function Formula() {
                 />
 
                 <SortableItem id={item.id}>
-                  {/* <div className='flex justify-between items-center rounded px-2'> */}
-                  <span className='md:p-1 lg:p-3 lg:text-xl md:text-lg'>
-                    {item.num}
-                  </span>
+                  <span className='p-3 lg:text-xl md:text-lg'>{item.num}</span>
                 </SortableItem>
 
                 <Parentheses
@@ -139,7 +148,7 @@ export default function Formula() {
                         onChange={(e) => {
                           handleOperatorChange(e.target.value, item.id);
                         }}
-                        className='md:p-1 lg:p-2 md:m-1 lg:m-2 bg-gray-100 rounded-sm'>
+                        className='md:p-1 lg:p-2 md:m-0 lg:m-2 bg-gray-100 rounded-sm'>
                         {operators.map((operator, index) => (
                           <option
                             value={operator}
@@ -160,24 +169,26 @@ export default function Formula() {
       </DndContext>
       <button
         onClick={judgeGame}
-        className='px-5 py-2 shadow m-4 active:shadow-none rounded-md bg-yellow-300 text-red-600 text-center'>
+        className='px-5 py-2 shadow m-1 active:shadow-none rounded-md bg-yellow-300 text-red-600 text-center'>
         Attack
       </button>
-      {isRight !== "" && (
+      {status !== "" && (
         <button
-          onClick={() => setNumList(genNumList(piece))}
-          className='text-lg px-3 py-1 m-2 bg-lime-50 text-slate-800 rounded-sm border hover:border-2'>
-          {isRight === "成功です!" ? "NEXT" : "PASS"}
+          onClick={() => {
+            setNumList(genNumList(piece));
+            if (status === "right") setIsRight(["", ""]);
+          }}
+          className='text-lg px-3 py-1 m-1 bg-lime-50 text-slate-800 rounded-sm border hover:border-2'>
+          {status === "right" ? "NEXT" : "PASS"}
         </button>
       )}
       <div className='flex flex-col justify-center items-center'>
         <div
-          className={`text-center text-xl font-bold p-2 m-3 ${
-            isRight === "成功です!" ? "text-red-600" : ""
-          }`}>
+          className={`text-center text-xl font-bold p-2 m-1 ${
+            status === "right" && "text-yellow-700 text-2xl"
+          } ${status === "error" && "text-red-600"}`}>
           {isRight}
         </div>
-        {error !== "" && <p>{error}</p>}
         <div className='text-lg'>現在のスコア: {score}</div>
       </div>
     </main>

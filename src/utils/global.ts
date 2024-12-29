@@ -1,3 +1,4 @@
+import sanitize from "sanitize-html";
 import { Random } from "../utils/rand";
 import { NumElement } from "../utils/types";
 
@@ -21,4 +22,10 @@ export const genNumList = (piece: number): NumElement[] => {
     openParentheses: false,
     closeParentheses: false,
   }));
+};
+
+export const calcEnteredFormula = (formula: string) => {
+  const safetyCode = sanitize(formula);
+  const value = eval(safetyCode);
+  return value;
 };
