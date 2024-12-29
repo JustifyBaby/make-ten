@@ -60,9 +60,7 @@ export default function Formula() {
     let formula = "";
     for (const item of numList.map(
       ({ num, operator, openParentheses, closeParentheses }) =>
-        `${openParentheses ? "(" : ""}${num}${
-          closeParentheses ? ")" : ""
-        }${operator}`
+        `${openParentheses && "("}${num}${closeParentheses && ")"}${operator}`
     )) {
       formula += item;
     }
