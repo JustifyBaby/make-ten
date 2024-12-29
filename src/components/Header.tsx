@@ -5,7 +5,7 @@ const Header = () => {
 
   return (
     <header className='flex flex-col justify-center items-center'>
-      <h1 className='text-2xl'>Make Ten</h1>
+      <h1 className='text-2xl m-2 p-2'>Make Ten</h1>
       <div className='m-2'>
         <div className='flex justify-center items-center'>
           <h2 className='text-lg m-2'>遊び方</h2>

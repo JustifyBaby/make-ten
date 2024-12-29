@@ -35,11 +35,9 @@ export default function Formula() {
   const [scoreRate, setScoreRate] = useState(1);
   const [scoreRateChange, setScoreRateChange] = useState(1);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    // useSensor(KeyboardSensor),
-    useSensor(TouchSensor)
-  );
+  const [currentFormula, setCurrentFormula] = useState("");
+
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (active.id === over?.id) return;
@@ -73,6 +71,7 @@ export default function Formula() {
     if (formula.endsWith("+") || formula.endsWith("-")) formula += 0;
     else formula += 1;
 
+    setCurrentFormula(formula);
     try {
       const calcResult = calcEnteredFormula(formula);
       if (calcResult === 10) {
@@ -189,6 +188,7 @@ export default function Formula() {
           } ${status === "error" && "text-red-600"}`}>
           {isRight}
         </div>
+        <div className='text-center font-medium'>{currentFormula}</div>
         <div className='text-lg'>現在のスコア: {score}</div>
       </div>
     </main>
