@@ -186,7 +186,9 @@ export default function Formula() {
           } ${status === "error" && "text-red-600"}`}>
           {isRight}
         </div>
-        <div className='text-center font-medium p-2'>{currentFormula}</div>
+        <div className='text-center font-medium p-2'>
+          入力した式: {currentFormula}
+        </div>
         <div className='text-lg'>現在のスコア: {score}</div>
       </div>
     </main>
